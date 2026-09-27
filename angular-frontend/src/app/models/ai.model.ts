@@ -1,12 +1,12 @@
-export interface AIModel {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  provider: string;
-  color: string;
-  icon: string;
-}
+import type {
+  Candidate,
+  Criterion,
+  Evaluation,
+  ProviderFailure,
+  TaskAnalysis,
+} from '../../../../lib/ai/types';
+
+export type { Candidate, Criterion, Evaluation, ProviderFailure, TaskAnalysis };
 
 export type TaskType = 'logo' | 'cover_letter' | 'email' | 'article' | 'code' | 'general';
 
@@ -18,29 +18,24 @@ export interface TaskOption {
   placeholder: string;
 }
 
-export interface AIResponse {
-  modelId: string;
-  content: string;
-  score: number;
-  reasoning: string;
-  latency: number;
-  timestamp: Date;
-}
-
 export interface ComparisonResult {
   id: string;
   prompt: string;
   taskType: TaskType;
-  responses: AIResponse[];
-  bestModelId: string;
-  createdAt: Date;
+  analysis: TaskAnalysis | null;
+  candidates: Candidate[];
+  criteria: Criterion[];
+  evaluations: Evaluation[];
+  providerErrors: ProviderFailure[];
+  expectedModelCount: number;
+  evaluationError: string | null;
+  createdAt: string;
 }
 
 export interface HistoryItem {
   id: string;
   prompt: string;
   taskType: TaskType;
-  bestModel: string;
-  bestScore: number;
-  createdAt: Date;
+  candidateCount: number;
+  createdAt: string;
 }

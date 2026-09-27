@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^1.2.13",
     "@langchain/langgraph": "^1.4.18",
     "groq-sdk": "^1.6.0",

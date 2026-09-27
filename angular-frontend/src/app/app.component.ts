@@ -12,8 +12,8 @@ import { NavbarComponent } from './components/navbar/navbar.component';
       <main class="flex-1">
         <router-outlet></router-outlet>
       </main>
-      <footer class="py-6 px-4 text-center text-slate-500 text-sm border-t border-slate-800">
-        <p>Verdict &copy; 2026 - Compare 5 Open-Source AI Models & Get the Best Result</p>
+      <footer class="py-6 px-4 text-center text-slate-400 text-sm border-t border-white/10">
+        <p>VERDICT / AI Studio &copy; 2026 · Different models. Your decision.</p>
       </footer>
     </div>
   `

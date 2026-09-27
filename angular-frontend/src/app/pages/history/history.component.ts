@@ -12,28 +12,27 @@ import { AiComparisonService } from '../../services/ai-comparison.service';
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-8">
         <h1 class="text-3xl font-bold mb-2">
-          <span class="gradient-text">📜 Verdict History</span>
+          <span class="gradient-text">Comparison history</span>
         </h1>
-        <p class="text-slate-400">Review your past AI comparisons and winning verdicts</p>
+        <p class="text-slate-400">Review and delete comparisons from this session.</p>
       </div>
 
       @if (history.length === 0) {
         <div class="glass-card rounded-2xl p-12 text-center">
           <div class="text-6xl mb-4">🕵️</div>
-          <h2 class="text-xl font-semibold mb-2">No verdicts yet</h2>
-          <p class="text-slate-400 mb-6">Start comparing AI models to see your verdict history here</p>
+          <h2 class="text-xl font-semibold mb-2">No comparisons yet</h2>
+          <p class="text-slate-400 mb-6">Completed comparisons appear here during this session.</p>
           <a
             routerLink="/"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-600 via-red-600 to-pink-600 hover:from-amber-500 hover:via-red-500 hover:to-pink-500 transition-all shadow-lg shadow-red-500/25"
+            class="submit-button inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all"
           >
-            <span>⚖️</span>
-            <span>Get Your First Verdict</span>
+            <span>Compare answers</span>
           </a>
         </div>
       } @else {
         <div class="space-y-4">
           <div class="flex items-center justify-between mb-4">
-            <span class="text-sm text-slate-400">{{ history.length }} verdict{{ history.length > 1 ? 's' : '' }}</span>
+            <span class="text-sm text-slate-400">{{ history.length }} comparison{{ history.length > 1 ? 's' : '' }}</span>
           </div>
 
           @for (item of history; track item.id) {
@@ -45,10 +44,12 @@ import { AiComparisonService } from '../../services/ai-comparison.service';
                     <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-800 text-slate-300">
                       {{ getTaskLabel(item.taskType) }}
                     </span>
-                    <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-green-500/10 text-green-400 border border-green-500/30">
-                      ⚖️ {{ item.bestModel }}
+                    <span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-slate-800 text-slate-300">
+                      {{ item.candidateCount }} candidate{{ item.candidateCount === 1 ? '' : 's' }}
                     </span>
-                    <span class="text-sm font-bold text-green-400">{{ item.bestScore }}/100</span>
+                    <button type="button" class="history-delete" (click)="deleteItem(item.id)" [attr.aria-label]="'Delete comparison: ' + item.prompt.slice(0, 60)">
+                      Delete
+                    </button>
                   </div>
                   <p class="text-slate-300 line-clamp-2 mb-2">{{ item.prompt }}</p>
                   <p class="text-xs text-slate-500">{{ formatDate(item.createdAt) }}</p>
@@ -80,7 +81,7 @@ export class HistoryComponent {
     return task?.label || taskType.replace('_', ' ');
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | string): string {
     return new Date(date).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -88,5 +89,10 @@ export class HistoryComponent {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  deleteItem(id: string): void {
+    this.aiService.deleteHistoryItem(id);
+    this.history = this.aiService.getHistory();
   }
 }

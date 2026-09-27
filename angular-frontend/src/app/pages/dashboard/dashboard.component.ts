@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TaskType, ComparisonResult, AIModel } from '../../models/ai.model';
+import { TaskType, ComparisonResult } from '../../models/ai.model';
 import { AiComparisonService } from '../../services/ai-comparison.service';
 import { TaskSelectorComponent } from '../../components/task-selector/task-selector.component';
 import { PromptInputComponent } from '../../components/prompt-input/prompt-input.component';
 import { ComparisonResultsComponent } from '../../components/comparison-results/comparison-results.component';
+import { ModelLineup } from '../../services/ai-comparison.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,37 +19,43 @@ import { ComparisonResultsComponent } from '../../components/comparison-results/
   template: `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="text-center mb-10">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium mb-4">
-          <span>⚖️</span>
-          <span>Powered by 5 Open-Source AI Models</span>
+        <div class="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+          <span class="hero-badge-dot"></span>
+          <span>YOUR AI CREATIVE STUDIO</span>
         </div>
         <h1 class="text-4xl sm:text-5xl font-bold mb-4">
-          <span class="gradient-text">Ask Once. Compare 5 AIs.</span>
+          <span class="gradient-text">One brief. More ways to see it.</span>
           <br>
-          <span class="text-white">Get the Verdict.</span>
+          <span class="text-white">You make the call.</span>
         </h1>
-        <p class="text-lg text-slate-400 max-w-2xl mx-auto">
-          Generate logos, cover letters, emails, articles, code and more. We run your request through
-          <span class="text-blue-400 font-semibold"> Llama 3</span>,
-          <span class="text-orange-400 font-semibold"> Mistral</span>,
-          <span class="text-green-400 font-semibold"> Gemma</span>,
-          <span class="text-purple-400 font-semibold"> Falcon</span> &
-          <span class="text-pink-400 font-semibold"> Zephyr</span> — then deliver the verdict.
+        <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
+          Send one brief to every connected model. Compare the ideas, refine the direction, and make the final call.
         </p>
-      </div>
-
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
-        @for (model of models; track model.id) {
-          <div class="glass-card rounded-xl p-4 text-center">
-            <div
-              class="w-12 h-12 mx-auto rounded-xl flex items-center justify-center text-2xl mb-2 bg-gradient-to-br"
-              [ngClass]="model.color"
-            >
-              {{ model.icon }}
+        <p class="mt-3 text-xs text-slate-300">
+          @if (modelLineup) {
+            {{ modelLineup.count }} working target{{ modelLineup.count === 1 ? '' : 's' }} configured
+            @if (modelLineup.count > 0) {
+              <span> · {{ modelProviderNames }}</span>
+            }
+          } @else {
+            Checking your model lineup…
+          }
+        </p>
+        @if (modelLineup; as lineup) {
+          @if (lineup.models.length > 0) {
+            <div class="model-lineup mt-3" aria-label="Connected models">
+              @for (model of lineup.models; track model.provider + model.modelId) {
+                <span class="model-chip">{{ model.modelName }}</span>
+              }
             </div>
-            <div class="font-semibold text-sm">{{ model.name }}</div>
-            <div class="text-xs text-slate-500">{{ model.provider }}</div>
-          </div>
+          }
+          @if (lineup.count === 0 && !modelLineupError) {
+            <p class="mt-2 text-xs text-amber-200">Add a supported provider API key to connect models.</p>
+          }
+        }
+        <p class="mt-2 text-xs text-slate-400">Want Claude, Gemini, or DeepSeek too? Add their API keys in the server’s <code>.env.local</code> file. Only connected models are listed.</p>
+        @if (modelLineupError) {
+          <p class="mt-2 text-sm text-amber-200" role="status">{{ modelLineupError }}</p>
         }
       </div>
 
@@ -60,81 +67,83 @@ import { ComparisonResultsComponent } from '../../components/comparison-results/
       <app-prompt-input
         [taskType]="selectedTask"
         [isLoading]="isLoading"
+        [modelCount]="modelLineup?.count ?? 0"
         (submit)="onSubmit($event)"
       ></app-prompt-input>
 
       @if (isLoading) {
         <div class="glass-card rounded-2xl p-8 mb-8">
-          <div class="text-center mb-6">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium mb-4">
-              <div class="flex items-center gap-1">
-                <div class="w-2 h-2 rounded-full bg-amber-400 loading-dot"></div>
-                <div class="w-2 h-2 rounded-full bg-amber-400 loading-dot"></div>
-                <div class="w-2 h-2 rounded-full bg-amber-400 loading-dot"></div>
-              </div>
-              <span>Judging responses across 5 models...</span>
-            </div>
-            <h3 class="text-xl font-semibold mb-2">Analyzing your request with all AI models</h3>
-            <p class="text-slate-400">The verdict will be delivered in 2-5 seconds</p>
-          </div>
+          <p class="text-center text-slate-200 font-medium">Generating responses...</p>
+        </div>
+      }
 
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
-            @for (model of models; track model.id) {
-              <div class="rounded-xl overflow-hidden border border-slate-700">
-                <div class="p-3 flex items-center gap-2 border-b border-slate-700/50 bg-slate-800/50">
-                  <div
-                    class="w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-gradient-to-br"
-                    [ngClass]="model.color"
-                  >
-                    {{ model.icon }}
-                  </div>
-                  <span class="text-sm font-medium">{{ model.name }}</span>
-                </div>
-                <div class="p-3 space-y-2">
-                  <div class="h-3 rounded shimmer"></div>
-                  <div class="h-3 rounded shimmer w-5/6"></div>
-                  <div class="h-3 rounded shimmer w-4/6"></div>
-                  <div class="h-3 rounded shimmer"></div>
-                </div>
-              </div>
-            }
-          </div>
+      @if (errorMessage) {
+        <div class="glass-card rounded-xl border border-amber-500/30 bg-amber-900/10 p-4 text-amber-200" role="alert">
+          {{ errorMessage }}
         </div>
       }
 
       @if (latestResult) {
         <app-comparison-results
           [result]="latestResult"
+          [imageGenerationAvailable]="modelLineup?.imageGenerationAvailable ?? false"
+          [isRefining]="isLoading"
+          (refine)="onSubmit($event, false)"
         ></app-comparison-results>
       }
     </div>
   `
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   selectedTask: TaskType = 'general';
   isLoading = false;
+  errorMessage: string | null = null;
   latestResult: ComparisonResult | null = null;
-  models: AIModel[] = [];
+  modelLineup: ModelLineup | null = null;
+  modelLineupError: string | null = null;
 
-  constructor(private aiService: AiComparisonService) {
-    this.models = this.aiService.getModels();
+  constructor(private aiService: AiComparisonService) {}
+
+  ngOnInit(): void {
+    this.aiService.getModelLineup().subscribe({
+      next: lineup => this.modelLineup = lineup,
+      error: () => {
+        this.modelLineupError = 'Could not check configured models. You can still try a comparison.';
+        this.modelLineup = { count: 0, models: [], imageGenerationAvailable: false };
+      },
+    });
+  }
+
+  get modelProviderNames(): string {
+    return [...new Set(this.modelLineup?.models.map(model => model.provider) ?? [])]
+      .map(provider => ({ groq: 'Groq', gemini: 'Gemini', deepseek: 'DeepSeek', claude: 'Claude' }[provider] ?? provider))
+      .join(' · ');
   }
 
   onTaskSelected(task: TaskType): void {
     this.selectedTask = task;
   }
 
-  onSubmit(prompt: string): void {
+  onSubmit(prompt: string, replaceResults = true): void {
     this.isLoading = true;
-    this.latestResult = null;
+    if (replaceResults) {
+      this.latestResult = null;
+    }
+    this.errorMessage = null;
 
     this.aiService.compareModels(prompt, this.selectedTask).subscribe({
       next: (result: ComparisonResult) => {
         this.latestResult = result;
         this.isLoading = false;
       },
-      error: () => {
+      error: (error: unknown) => {
         this.isLoading = false;
+        const details = error && typeof error === 'object' && 'error' in error
+          ? (error as { error?: { message?: string } }).error
+          : undefined;
+        this.errorMessage = error && typeof error === 'object' && 'name' in error && error.name === 'TimeoutError'
+          ? 'Request timed out. Please try again.'
+          : details?.message ?? 'No model response. Check provider access or try again.';
       }
     });
   }

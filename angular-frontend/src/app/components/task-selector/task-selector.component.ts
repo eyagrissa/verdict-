@@ -11,14 +11,18 @@ import { AiComparisonService } from '../../services/ai-comparison.service';
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
       @for (task of tasks; track task.id) {
         <button
+          type="button"
           (click)="selectTask(task.id)"
-          class="glass-card rounded-xl p-4 text-left transition-all border-2"
-          [ngClass]="{
-            'border-blue-500 bg-blue-500/10': selectedTask === task.id,
-            'border-transparent hover:border-slate-600': selectedTask !== task.id
-          }"
+          [attr.aria-pressed]="selectedTask === task.id"
+          class="task-tile glass-card rounded-xl p-4 text-left transition-all duration-200 border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+          [ngClass]="['task-tile-' + task.id, selectedTask === task.id ? 'task-tile-selected' : '']"
         >
-          <div class="text-3xl mb-2">{{ task.icon }}</div>
+          <div class="flex items-start justify-between mb-2">
+            <span class="task-icon text-2xl">{{ task.icon }}</span>
+            @if (selectedTask === task.id) {
+              <span class="text-emerald-300 text-sm font-bold" aria-label="Selected">&#10003;</span>
+            }
+          </div>
           <div class="font-semibold text-sm mb-1">{{ task.label }}</div>
           <div class="text-xs text-slate-400 line-clamp-2">{{ task.description }}</div>
         </button>
