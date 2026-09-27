@@ -1,0 +1,17 @@
+# Secrets
+.env
+backend/.env
+
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Logs / OS
+*.log
+.DS_Store
+npm-debug.log*
+
+# Editors
+.vscode/
+.idea/

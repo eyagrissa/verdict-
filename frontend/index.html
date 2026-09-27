@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verdict — Comparez des résultats IA</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <h1 class="brand">Verdict</h1>
+        <p class="tagline">
+          Comparez plusieurs résultats IA, notez-les selon des critères
+          adaptés, obtenez un classement justifié.
+        </p>
+      </header>
+
+      <!-- Bloc 1 — Tâche -->
+      <section class="block" id="block-task">
+        <h2 class="block-title">1. Tâche</h2>
+        <label class="sr-only" for="task-input">Décrire la tâche</label>
+        <textarea
+          id="task-input"
+          rows="4"
+          placeholder="Ex. : Écris une fonction JavaScript qui vérifie si une chaîne est un palindrome, avec gestion des espaces et de la casse."
+        ></textarea>
+        <button type="button" id="btn-generate" class="btn btn-primary">
+          Générer avec Gemini + Groq
+        </button>
+        <p id="generate-status" class="status" aria-live="polite"></p>
+      </section>
+
+      <!-- Bloc 2 — Versions -->
+      <section class="block" id="block-versions">
+        <h2 class="block-title">2. Versions</h2>
+        <p class="block-hint">
+          Les versions générées apparaissent ici. Vous pouvez les éditer ou
+          coller une version manuelle.
+        </p>
+        <div id="versions-grid" class="versions-grid">
+          <!-- filled by JS -->
+        </div>
+      </section>
+
+      <!-- Bloc 3 — Critères -->
+      <section class="block" id="block-criteria">
+        <h2 class="block-title">3. Critères</h2>
+        <div class="criteria-actions">
+          <button type="button" id="btn-suggest" class="btn btn-secondary">
+            Suggérer des critères
+          </button>
+          <span id="domain-badge" class="domain-badge hidden"></span>
+        </div>
+        <p id="criteria-status" class="status" aria-live="polite"></p>
+        <div id="criteria-list" class="criteria-list">
+          <p class="placeholder-msg">
+            Générez des versions ou cliquez « Suggérer des critères ».
+          </p>
+        </div>
+      </section>
+
+      <!-- Bloc 4 — Comparer -->
+      <section class="block" id="block-compare">
+        <h2 class="block-title">4. Comparer</h2>
+        <button type="button" id="btn-compare" class="btn btn-primary" disabled>
+          Comparer
+        </button>
+        <p id="compare-status" class="status" aria-live="polite"></p>
+      </section>
+
+      <!-- Bloc 5 — Résultats -->
+      <section class="block" id="block-results">
+        <h2 class="block-title">5. Résultats</h2>
+        <div id="results-panel" class="results-panel">
+          <p class="placeholder-msg">
+            Les résultats de la comparaison s’afficheront ici.
+          </p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>Verdict</span> — clés API côté serveur uniquement
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
