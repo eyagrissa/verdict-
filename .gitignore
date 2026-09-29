@@ -15,3 +15,5 @@ npm-debug.log*
 # Editors
 .vscode/
 .idea/
+.next/
+next-env.d.ts
